@@ -1,0 +1,181 @@
+package crimeDetectionInCreditCardFraud;
+import java.awt.*;
+import java.awt.event.*;
+
+public class CrimeDetectionApp extends Frame implements ActionListener {
+
+    // Declare UI components for the first page
+    private TextField cardNumberField, nameField, emailField, homeLocationField;
+    private TextField transactionIdField, amountField, locationField, timeField;
+    private Button submitButton;
+
+    // Transaction details storage
+    private String transactionResult = "";
+
+    public CrimeDetectionApp() {
+        // Setup frame
+        setTitle("Credit Card Fraud Detection");
+        setSize(600, 600);
+        setLayout(new BorderLayout());
+
+        // Welcome title
+        Label title = new Label("Welcome to Credit Card Fraud Detection", Label.CENTER);
+        title.setFont(new Font("Arial", Font.BOLD, 20));
+        title.setForeground(new Color(0, 102, 204));
+        title.setBackground(new Color(230, 230, 250));
+        title.setPreferredSize(new Dimension(600, 50));
+        add(title, BorderLayout.NORTH);
+
+        // Input panel with GridBagLayout
+        Panel inputPanel = new Panel(new GridBagLayout());
+        inputPanel.setBackground(new Color(245, 245, 245)); // Light gray background
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(5, 10, 5, 10); // Padding between components
+
+        // Labels and text fields
+        cardNumberField = new TextField();
+        nameField = new TextField();
+        emailField = new TextField();
+        homeLocationField = new TextField();
+        transactionIdField = new TextField();
+        amountField = new TextField();
+        locationField = new TextField();
+        timeField = new TextField();
+
+        // Set preferred size for text fields
+        Dimension textFieldSize = new Dimension(200, 20); // Adjust width and height
+        cardNumberField.setPreferredSize(textFieldSize);
+        nameField.setPreferredSize(textFieldSize);
+        emailField.setPreferredSize(textFieldSize);
+        homeLocationField.setPreferredSize(textFieldSize);
+        transactionIdField.setPreferredSize(textFieldSize);
+        amountField.setPreferredSize(textFieldSize);
+        locationField.setPreferredSize(textFieldSize);
+        timeField.setPreferredSize(textFieldSize);
+
+        String[] labels = {
+            "Card Number:", "Name:", "Email:", "Home Location:", 
+            "Transaction ID:", "Transaction Amount:", "Transaction Location:", "Transaction Time:"
+        };
+        TextField[] fields = {
+            cardNumberField, nameField, emailField, homeLocationField, 
+            transactionIdField, amountField, locationField, timeField
+        };
+
+        // Add labels and text fields dynamically
+        for (int i = 0; i < labels.length; i++) {
+            gbc.gridx = 0;
+            gbc.gridy = i;
+            gbc.weightx = 0.3;
+            Label label = new Label(labels[i], Label.RIGHT);
+            label.setFont(new Font("Arial", Font.BOLD, 12));
+            inputPanel.add(label, gbc);
+
+            gbc.gridx = 1;
+            gbc.weightx = 0.7;
+            inputPanel.add(fields[i], gbc);
+        }
+
+        // Submit button
+        submitButton = new Button("Submit Transaction");
+        submitButton.setFont(new Font("Arial", Font.BOLD, 14));
+        submitButton.setForeground(Color.WHITE);
+        submitButton.setBackground(new Color(0, 153, 76));
+        gbc.gridx = 0;
+        gbc.gridy = labels.length;
+        gbc.gridwidth = 2;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.anchor = GridBagConstraints.CENTER;
+        inputPanel.add(submitButton, gbc);
+
+        add(inputPanel, BorderLayout.CENTER);
+
+        // Add action listener to button
+        submitButton.addActionListener(this);
+
+        // Center the frame and make it visible
+        setLocationRelativeTo(null);
+        setVisible(true);
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if (e.getSource() == submitButton) {
+            try {
+                // Collect input details
+                String cardNumber = cardNumberField.getText();
+                String name = nameField.getText();
+                String email = emailField.getText();
+                String homeLocation = homeLocationField.getText();
+                String transactionId = transactionIdField.getText();
+                double amount = Double.parseDouble(amountField.getText());
+                String location = locationField.getText();
+                String time = timeField.getText();
+
+                // Perform fraud detection
+                transactionResult = detectFraud(amount, location, homeLocation);
+
+                // Open the result page
+                new ResultPage(transactionResult);
+            } catch (Exception ex) {
+                // Handle invalid input
+                showPopup("Invalid input! Please enter valid transaction details.");
+            }
+        }
+    }
+
+    // Fraud detection logic
+    private String detectFraud(double amount, String location, String homeLocation) {
+        double threshold = 1000.00;
+        if (amount > threshold) {
+            return "Fraudulent Transaction: Amount exceeds threshold.";
+        }
+        if (!location.equalsIgnoreCase(homeLocation)) {
+            return "Fraudulent Transaction: Location mismatch.";
+        }
+        return "Transaction Successful: No fraud detected.";
+    }
+
+    // Show popup for error messages
+    private void showPopup(String message) {
+        Dialog popup = new Dialog(this, "Error", true);
+        popup.setSize(300, 150);
+        popup.setLayout(new BorderLayout());
+        popup.add(new Label(message, Label.CENTER), BorderLayout.CENTER);
+        Button okButton = new Button("OK");
+        okButton.addActionListener(e -> popup.setVisible(false));
+        popup.add(okButton, BorderLayout.SOUTH);
+        popup.setVisible(true);
+    }
+
+    // Inner class for Result Page
+    class ResultPage extends Frame {
+
+        public ResultPage(String result) {
+            // Setup result frame
+            setTitle("Credit Card Fraud Detection - Result Page");
+            setSize(400, 200);
+            setLayout(new BorderLayout());
+
+            // Display the result
+            Label resultLabel = new Label(result, Label.CENTER);
+            resultLabel.setFont(new Font("Arial", Font.BOLD, 16));
+            resultLabel.setForeground(result.contains("Fraudulent") ? Color.RED : Color.GREEN);
+            add(resultLabel, BorderLayout.CENTER);
+
+            // Close button
+            Button closeButton = new Button("Close");
+            closeButton.addActionListener(e -> System.exit(0));
+            add(closeButton, BorderLayout.SOUTH);
+
+            // Center the frame on screen and show it
+            setLocationRelativeTo(null);
+            setVisible(true);
+        }
+    }
+
+    public static void main(String[] args) {
+        new CrimeDetectionApp();
+    }
+}
